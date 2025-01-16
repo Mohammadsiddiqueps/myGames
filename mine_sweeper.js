@@ -12,20 +12,15 @@ const getRandomNumbers = (noOfBombs, bombPositions) => {
   const randomNumber = Math.floor(Math.random() * 100);
 
   if (bombPositions.includes(randomNumber)) {
-   return getRandomNumbers(noOfBombs, bombPositions);
+    return getRandomNumbers(noOfBombs, bombPositions);
   }
 
   return getRandomNumbers(noOfBombs, [...bombPositions, randomNumber]);
 };
-function createGround(limit, bombPositions) {
-  let ground = "";
 
-  for (let cellCount = 1; cellCount <= limit; cellCount++) {
-    const valueToAdd = bombPositions.includes(" " + cellCount + ",")
-      ? "B"
-      : "0";
-    ground += valueToAdd;
-  }
+function createGround(limit, bombPositions) {
+  const ground = Array(limit).fill(0);
+  bombPositions.map((x) => (ground[x] = "B"));
 
   return ground;
 }
@@ -81,13 +76,7 @@ function setMineCount(mineMap) {
 }
 
 function getLine() {
-  let line = "";
-
-  for (let lineLength = 0; lineLength < LINE_LENGTH; lineLength++) {
-    line += HYPHEN;
-  }
-
-  return line;
+  return HYPHEN.repeat(LINE_LENGTH);
 }
 
 function getEmojiToPrint(cellValue) {
