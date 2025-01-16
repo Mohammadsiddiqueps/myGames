@@ -4,29 +4,26 @@ const HYPHEN = "-";
 const LINE_LENGTH = 49;
 const SAFE_CELLS = CELL_COUNT - NO_OF_BOMBS;
 
-function getRandomNumbers(noOfBombs) {
-  let bombPositions = "";
-  let bombCount = 0;
-
-  while (bombCount < noOfBombs) {
-    const randomNumber = " " + ((Math.floor(Math.random() * 100))) + ",";
-
-    if (bombPositions.includes(randomNumber)) {
-      continue;
-    }
-
-    bombPositions += randomNumber;
-    bombCount++;
+const getRandomNumbers = (noOfBombs, bombPositions) => {
+  if (bombPositions.length === noOfBombs) {
+    return bombPositions;
   }
 
-  return bombPositions;
-}
+  const randomNumber = Math.floor(Math.random() * 100);
 
+  if (bombPositions.includes(randomNumber)) {
+   return getRandomNumbers(noOfBombs, bombPositions);
+  }
+
+  return getRandomNumbers(noOfBombs, [...bombPositions, randomNumber]);
+};
 function createGround(limit, bombPositions) {
   let ground = "";
 
   for (let cellCount = 1; cellCount <= limit; cellCount++) {
-    const valueToAdd = bombPositions.includes(" " + cellCount + ",") ? "B" : "0";
+    const valueToAdd = bombPositions.includes(" " + cellCount + ",")
+      ? "B"
+      : "0";
     ground += valueToAdd;
   }
 
@@ -34,19 +31,23 @@ function createGround(limit, bombPositions) {
 }
 
 function getPosToIncrement(index) {
-  const isAtFirstRow = (index - 10) <= 0;
-  const isAtLastRow = (index + 10) > 100;
-  const isAtLeftRow = ((index - 1) % 10) === 0;
-  const isAtRightRow = (index % 10) === 0;
+  const isAtFirstRow = index - 10 <= 0;
+  const isAtLastRow = index + 10 > 100;
+  const isAtLeftRow = (index - 1) % 10 === 0;
+  const isAtRightRow = index % 10 === 0;
 
-  const upLeftCorner = !isAtFirstRow && !isAtLeftRow ? "," + (index - 11) + "," : " ";
-  const leftSide = !isAtLeftRow ? ("," + (index - 1) + ",") : " ";
-  const downLeftCorner = !isAtLastRow && !isAtLeftRow ? "," + (index + 9) + "," : " ";
+  const upLeftCorner =
+    !isAtFirstRow && !isAtLeftRow ? "," + (index - 11) + "," : " ";
+  const leftSide = !isAtLeftRow ? "," + (index - 1) + "," : " ";
+  const downLeftCorner =
+    !isAtLastRow && !isAtLeftRow ? "," + (index + 9) + "," : " ";
   const upSide = !isAtFirstRow ? "," + (index - 10) + "," : " ";
   const downSide = !isAtLastRow ? "," + (index + 10) + "," : " ";
   const rightSide = !isAtRightRow ? "," + (index + 1) + "," : " ";
-  const upRightCorner = !isAtFirstRow && !isAtRightRow ? "," + (index - 9) + "," : " ";
-  const downRightCorner = !isAtLastRow && !isAtRightRow ? "," + (index + 11) + "," : " ";
+  const upRightCorner =
+    !isAtFirstRow && !isAtRightRow ? "," + (index - 9) + "," : " ";
+  const downRightCorner =
+    !isAtLastRow && !isAtRightRow ? "," + (index + 11) + "," : " ";
 
   const firstValues = upLeftCorner + leftSide + downLeftCorner + upSide;
   const secondValues = downSide + rightSide + upRightCorner + downRightCorner;
@@ -58,7 +59,8 @@ function getIncrementedString(mineMap, posToIncrement) {
   let incrementedString = "";
 
   for (let cell = 0; cell < mineMap.length; cell++) {
-    const isCellToIncrement = posToIncrement.includes(("," + (cell + 1) + ",")) && mineMap[cell] !== "B";
+    const isCellToIncrement =
+      posToIncrement.includes("," + (cell + 1) + ",") && mineMap[cell] !== "B";
     let incrementedChar = +mineMap[cell];
 
     incrementedString += isCellToIncrement ? ++incrementedChar : mineMap[cell];
@@ -90,23 +92,28 @@ function getLine() {
 
 function getEmojiToPrint(cellValue) {
   switch (cellValue) {
-    case "0": return " 0️⃣ ";
-    case "1": return " 1️⃣ ";
-    case "2": return " 2️⃣ ";
-    case "3": return " 3️⃣ ";
-    case "4": return " 4️⃣ ";
+    case "0":
+      return " 0️⃣ ";
+    case "1":
+      return " 1️⃣ ";
+    case "2":
+      return " 2️⃣ ";
+    case "3":
+      return " 3️⃣ ";
+    case "4":
+      return " 4️⃣ ";
   }
 
   return " 💣";
 }
 
 function getCharToPrint(cellNo, openedCells, string, flagedCells) {
-  if (flagedCells.includes((" " + cellNo + ","))) {
+  if (flagedCells.includes(" " + cellNo + ",")) {
     return " 🚩";
   }
 
   if (openedCells.includes(" " + cellNo + ",")) {
-    return getEmojiToPrint(string[cellNo - 1])
+    return getEmojiToPrint(string[cellNo - 1]);
   }
 
   if (cellNo < 10) {
@@ -129,31 +136,55 @@ function getStyledGround(openedCells, mineMap, flagedCells) {
     const cellDesign = "┃" + character + " ";
     const isItTenthCell = cellNo % 10 === 0 ? "┃\n┃" + line + "┃\n" : "";
 
-    mineGround += cellDesign + isItTenthCell
+    mineGround += cellDesign + isItTenthCell;
   }
 
   return mineGround;
 }
 
 function openNearCells(openedCells, index) {
-  const isAtFirstRow = (index - 10) <= 0;
-  const isAtLastRow = (index + 10) > 100;
-  const isAtLeftRow = ((index - 1) % 10) === 0;
-  const isAtRightRow = (index % 10) === 0;
+  const isAtFirstRow = index - 10 <= 0;
+  const isAtLastRow = index + 10 > 100;
+  const isAtLeftRow = (index - 1) % 10 === 0;
+  const isAtRightRow = index % 10 === 0;
 
-  const upLeftCorner = (openedCells.includes(index - 11) || isAtFirstRow || isAtLeftRow) ? "" : (" " + (index - 11) + ",");
-  const leftSide = (openedCells.includes(index - 1) || isAtLeftRow) ? "" : (" " + (index - 1) + ",");
-  const downLeftCorner = (openedCells.includes(index + 9) || isAtLastRow || isAtLeftRow) ? "" : (" " + (index + 9) + ",");
-  const upSide = (openedCells.includes(index - 10) || isAtFirstRow) ? "" : (" " + (index - 10) + ",");
-  const downSide = (openedCells.includes(index + 10) || isAtLastRow) ? "" : (" " + (index + 10) + ",");
-  const rightSide = (openedCells.includes(index + 1) || isAtRightRow) ? "" : (" " + (index + 1) + ",");
-  const upRightCorner = (openedCells.includes(index - 9) || isAtRightRow || isAtFirstRow) ? "" : (" " + (index - 9) + ",");
-  const downRightCorner = (openedCells.includes(index + 11) || isAtRightRow || isAtLastRow) ? "" : (" " + (index + 11) + ",");
+  const upLeftCorner =
+    openedCells.includes(index - 11) || isAtFirstRow || isAtLeftRow
+      ? ""
+      : " " + (index - 11) + ",";
+  const leftSide =
+    openedCells.includes(index - 1) || isAtLeftRow
+      ? ""
+      : " " + (index - 1) + ",";
+  const downLeftCorner =
+    openedCells.includes(index + 9) || isAtLastRow || isAtLeftRow
+      ? ""
+      : " " + (index + 9) + ",";
+  const upSide =
+    openedCells.includes(index - 10) || isAtFirstRow
+      ? ""
+      : " " + (index - 10) + ",";
+  const downSide =
+    openedCells.includes(index + 10) || isAtLastRow
+      ? ""
+      : " " + (index + 10) + ",";
+  const rightSide =
+    openedCells.includes(index + 1) || isAtRightRow
+      ? ""
+      : " " + (index + 1) + ",";
+  const upRightCorner =
+    openedCells.includes(index - 9) || isAtRightRow || isAtFirstRow
+      ? ""
+      : " " + (index - 9) + ",";
+  const downRightCorner =
+    openedCells.includes(index + 11) || isAtRightRow || isAtLastRow
+      ? ""
+      : " " + (index + 11) + ",";
 
   const firstValues = upLeftCorner + leftSide + downLeftCorner + upSide;
   const secondValues = downSide + rightSide + upRightCorner + downRightCorner;
 
-  return openedCells + firstValues + secondValues + ' ';
+  return openedCells + firstValues + secondValues + " ";
 }
 
 function getBorderedMessage(message) {
@@ -170,9 +201,11 @@ function printBoardAndMessage(message) {
 }
 
 function getUserInput() {
-  const input = prompt("Enter Cell No to continue || Enter e to exit || Enter f to flag");
+  const input = prompt(
+    "Enter Cell No to continue || Enter e to exit || Enter f to flag"
+  );
   const isInputInRange = input <= CELL_COUNT && input > 0;
-  const isValidInput = (input === "f" || input === "e");
+  const isValidInput = input === "f" || input === "e";
   const isFlaged = flagedCells.includes(" " + input + ",");
   const isOpened = openedCells.includes(" " + input + ",");
 
@@ -190,7 +223,9 @@ function processInput(input, flagedCells, openedCells, mineMap) {
   }
 
   if (openedCells.split(",").length > SAFE_CELLS) {
-    printBoardAndMessage("Nice tactics, you got it 🏅 🏆\nYou are a Genius. You are Selected>>>>👑 👑");
+    printBoardAndMessage(
+      "Nice tactics, you got it 🏅 🏆\nYou are a Genius. You are Selected>>>>👑 👑"
+    );
   }
 }
 
@@ -209,7 +244,7 @@ while (!isGameDone) {
   //flag case...........
   if (input === "f") {
     const inputToFlag = prompt("Enter the CellNo to flag: ");
-    flagedCells = flagedCells + (" " + inputToFlag + ",")
+    flagedCells = flagedCells + (" " + inputToFlag + ",");
     printBoardAndMessage("NIce You Have flaged Successfully");
     continue;
   }
@@ -232,13 +267,15 @@ while (!isGameDone) {
   }
 
   // game finish case....
-  if (openedCells.split(",").length > SAFE_CELLS || mineMap[input - 1] === "B") {
+  if (
+    openedCells.split(",").length > SAFE_CELLS ||
+    mineMap[input - 1] === "B"
+  ) {
     flagedCells = "";
     openedCells = openedCells + bombPositions;
     isGameDone = true;
     processInput(input, flagedCells, openedCells, mineMap);
   }
-
 }
 
 // console.log(bombPositions);
@@ -260,5 +297,5 @@ while (!isGameDone) {
 //Dhanoj
 //sameera , sai ram
 
-// feedback 
+// feedback
 // very good game good siddique you are cool
