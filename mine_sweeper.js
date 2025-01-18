@@ -31,23 +31,33 @@ function getPosToIncrement(index) {
   const isAtLeftRow = (index - 1) % 10 === 0;
   const isAtRightRow = index % 10 === 0;
 
-  const upLeftCorner =
-    !isAtFirstRow && !isAtLeftRow ? "," + (index - 11) + "," : " ";
-  const leftSide = !isAtLeftRow ? "," + (index - 1) + "," : " ";
-  const downLeftCorner =
-    !isAtLastRow && !isAtLeftRow ? "," + (index + 9) + "," : " ";
-  const upSide = !isAtFirstRow ? "," + (index - 10) + "," : " ";
-  const downSide = !isAtLastRow ? "," + (index + 10) + "," : " ";
-  const rightSide = !isAtRightRow ? "," + (index + 1) + "," : " ";
-  const upRightCorner =
-    !isAtFirstRow && !isAtRightRow ? "," + (index - 9) + "," : " ";
-  const downRightCorner =
-    !isAtLastRow && !isAtRightRow ? "," + (index + 11) + "," : " ";
+  const arrayCondition = [
+    !isAtFirstRow && !isAtLeftRow,
+    !isAtFirstRow && !isAtRightRow,
+    !isAtLastRow && !isAtLeftRow,
+    !isAtLastRow && !isAtRightRow,
+    !isAtLeftRow,
+    !isAtFirstRow,
+    !isAtRightRow,
+    !isAtLastRow,
+  ];
 
-  const firstValues = upLeftCorner + leftSide + downLeftCorner + upSide;
-  const secondValues = downSide + rightSide + upRightCorner + downRightCorner;
-
-  return firstValues + secondValues;
+  const indexes = [
+    index - 11,
+    index + 9,
+    index - 9,
+    index + 11,
+    index - 1,
+    index - 10,
+    index + 1,
+    index + 10,
+  ];
+  return arrayCondition.reduce((a, b, i) => {
+    if (b) {
+      return [...a, indexes[i]];
+    }
+    return [...a];
+  }, []);
 }
 
 function getIncrementedString(mineMap, posToIncrement) {
