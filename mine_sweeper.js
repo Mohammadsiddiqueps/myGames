@@ -143,48 +143,42 @@ function getStyledGround(openedCells, mineMap, flagedCells) {
 }
 
 function openNearCells(openedCells, index) {
-  const isAtFirstRow = index - 10 <= 0;
-  const isAtLastRow = index + 10 > 100;
-  const isAtLeftRow = (index - 1) % 10 === 0;
-  const isAtRightRow = index % 10 === 0;
+  const [isAtFirstRow, isAtLastRow, isAtLeftRow, isAtRightRow] =
+    getPositionInfo(index);
 
-  const upLeftCorner =
-    openedCells.includes(index - 11) || isAtFirstRow || isAtLeftRow
-      ? ""
-      : " " + (index - 11) + ",";
-  const leftSide =
-    openedCells.includes(index - 1) || isAtLeftRow
-      ? ""
-      : " " + (index - 1) + ",";
-  const downLeftCorner =
-    openedCells.includes(index + 9) || isAtLastRow || isAtLeftRow
-      ? ""
-      : " " + (index + 9) + ",";
-  const upSide =
-    openedCells.includes(index - 10) || isAtFirstRow
-      ? ""
-      : " " + (index - 10) + ",";
-  const downSide =
-    openedCells.includes(index + 10) || isAtLastRow
-      ? ""
-      : " " + (index + 10) + ",";
-  const rightSide =
-    openedCells.includes(index + 1) || isAtRightRow
-      ? ""
-      : " " + (index + 1) + ",";
-  const upRightCorner =
-    openedCells.includes(index - 9) || isAtRightRow || isAtFirstRow
-      ? ""
-      : " " + (index - 9) + ",";
-  const downRightCorner =
-    openedCells.includes(index + 11) || isAtRightRow || isAtLastRow
-      ? ""
-      : " " + (index + 11) + ",";
+  if (!(openedCells.includes(index - 11) || isAtFirstRow || isAtLeftRow)) {
+    openedCells.push(index - 11);
+  }
 
-  const firstValues = upLeftCorner + leftSide + downLeftCorner + upSide;
-  const secondValues = downSide + rightSide + upRightCorner + downRightCorner;
+  if (!(openedCells.includes(index - 1) || isAtLeftRow)) {
+    openedCells.push(index - 1);
+  }
 
-  return openedCells + firstValues + secondValues + " ";
+  if (!(openedCells.includes(index + 9) || isAtLastRow || isAtLeftRow)) {
+    openedCells.push(index + 9);
+  }
+
+  if (!(openedCells.includes(index - 10) || isAtFirstRow)) {
+    openedCells.push(index - 10);
+  }
+
+  if (!(openedCells.includes(index + 10) || isAtLastRow)) {
+    openedCells.push(index + 10);
+  }
+
+  if (!(openedCells.includes(index + 1) || isAtRightRow)) {
+    openedCells.push(index + 1);
+  }
+
+  if (!(openedCells.includes(index - 9) || isAtRightRow || isAtFirstRow)) {
+    openedCells.push(index - 9);
+  }
+
+  if (!(openedCells.includes(index + 11) || isAtRightRow || isAtLastRow)) {
+    openedCells.push(index + 11);
+  }
+
+  return openedCells;
 }
 
 function getBorderedMessage(message) {
