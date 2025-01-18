@@ -261,10 +261,7 @@ while (!isGameDone) {
   }
 
   // game finish case....
-  if (
-    openedCells.length > SAFE_CELLS ||
-    mineMap[input - 1] === "B"
-  ) {
+  if (openedCells.length > SAFE_CELLS || mineMap[input - 1] === "B") {
     flagedCells = "";
     openedCells = openedCells + bombPositions;
     isGameDone = true;
