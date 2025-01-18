@@ -29,12 +29,12 @@ const getIncrementConditions = (index) => {
   const [isAtFirstRow, isAtLastRow, isAtLeftRow, isAtRightRow] =
     getPositionInfo(index);
   return [
-    !isAtFirstRow && !isAtLeftRow,
-    !isAtFirstRow && !isAtRightRow,
+    !isAtFirstRow && !isAtLeftRow, //
+    !isAtFirstRow && !isAtRightRow, //
     !isAtLastRow && !isAtLeftRow,
     !isAtLastRow && !isAtRightRow,
     !isAtLeftRow,
-    !isAtFirstRow,
+    !isAtFirstRow, //
     !isAtRightRow,
     !isAtLastRow,
   ];
@@ -54,8 +54,8 @@ function getPosToIncrement(index) {
 
   const indexes = [
     index - 11,
-    index + 9,
     index - 9,
+    index + 9,
     index + 11,
     index - 1,
     index - 10,
@@ -83,7 +83,7 @@ function getIncrementedString(mineMap, posToIncrement) {
 function setMineCount(mineMap) {
   for (let index = 0; index < mineMap.length; index++) {
     if (mineMap[index] === "B") {
-      const posToIncrement = getPosToIncrement(index + 1);
+      const posToIncrement = getPosToIncrement(index);
       mineMap = getIncrementedString(mineMap, posToIncrement);
     }
   }
@@ -108,11 +108,11 @@ function getEmojiToPrint(cellValue) {
 //updated this much
 
 function getCharToPrint(cellNo, openedCells, string, flagedCells) {
-  if (flagedCells.includes(cellNo)) {
+  if (flagedCells.includes(cellNo - 1)) {
     return " 🚩";
   }
 
-  if (openedCells.includes(cellNo)) {
+  if (openedCells.includes(cellNo - 1)) {
     return getEmojiToPrint(string[cellNo - 1]);
   }
 
@@ -188,10 +188,11 @@ function getBorderedMessage(message) {
 }
 
 function printBoardAndMessage(message) {
-  console.clear();
+  // console.clear();
   console.log(getBorderedMessage(message));
   console.log("\n💣 💣 💥 💥💣 𝐌 𝑰𝐍 𝑬 𝐒Ꮤ 𝑬 𝑬 𝐏 𝑬 Ʀ 💣 💣 💥 💥 💣");
   console.log(getStyledGround(openedCells, mineMap, flagedCells));
+  // console.log(openedCells);
 }
 
 function getUserInput() {
@@ -200,7 +201,7 @@ function getUserInput() {
   );
   const isInputInRange = input <= CELL_COUNT && input > 0;
   const isValidInput = input === "f" || input === "e";
-  const isFlaged = flagedCells.includes(" " + input + ",");
+  const isFlaged = flagedCells.includes(input);
   const isOpened = openedCells.includes(input);
 
   if (!(isInputInRange || isValidInput) || isFlaged || isOpened) {
@@ -216,14 +217,14 @@ function processInput(input, flagedCells, openedCells, mineMap) {
     printBoardAndMessage("Bomb Blasted 💥 💥 💥, You have losed......");
   }
 
-  if (openedCells.split(",").length > SAFE_CELLS) {
+  if (openedCells.length > SAFE_CELLS) {
     printBoardAndMessage(
       "Nice tactics, you got it 🏅 🏆\nYou are a Genius. You are Selected>>>>👑 👑"
     );
   }
 }
 
-const bombPositions = getRandomNumbers(NO_OF_BOMBS);
+const bombPositions = getRandomNumbers(NO_OF_BOMBS, []);
 const mineGround = createGround(CELL_COUNT, bombPositions);
 const mineMap = setMineCount(mineGround);
 let openedCells = [];
@@ -233,12 +234,13 @@ let isGameDone = false;
 printBoardAndMessage("let's see your tactics 🤘 🤘");
 
 while (!isGameDone) {
+  // console.log(mineMap);
+  // console.log(bombPositions);
   const input = getUserInput();
-
   //flag case...........
   if (input === "f") {
     const inputToFlag = prompt("Enter the CellNo to flag: ");
-    flagedCells.push(inputToFlag);
+    flagedCells.push(Number(inputToFlag));
     printBoardAndMessage("NIce You Have flaged Successfully");
     continue;
   }
@@ -251,7 +253,7 @@ while (!isGameDone) {
 
   //cell open case..
   if (!openedCells.includes(input)) {
-    openedCells.push(input);
+    openedCells.push(input - 1);
 
     if (mineMap[input - 1] === "0") {
       openedCells = openNearCells(openedCells, +input, mineMap);
@@ -262,10 +264,17 @@ while (!isGameDone) {
 
   // game finish case....
   if (openedCells.length > SAFE_CELLS || mineMap[input - 1] === "B") {
-    flagedCells = "";
-    openedCells = openedCells + bombPositions;
+    flagedCells = [];
+    openedCells = [...openedCells, ...bombPositions];
+    // console.log(openedCells);
+
     isGameDone = true;
-    processInput(input, flagedCells, openedCells, mineMap);
+    processInput(
+      input,
+      flagedCells,
+      [...openedCells, ...bombPositions],
+      mineMap
+    );
   }
 }
 
