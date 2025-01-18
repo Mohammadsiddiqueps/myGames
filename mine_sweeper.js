@@ -108,7 +108,7 @@ function getEmojiToPrint(cellValue) {
 //updated this much
 
 function getCharToPrint(cellNo, openedCells, string, flagedCells) {
-  if (flagedCells.includes(" " + cellNo + ",")) {
+  if (flagedCells.includes(cellNo)) {
     return " 🚩";
   }
 
@@ -227,7 +227,7 @@ const bombPositions = getRandomNumbers(NO_OF_BOMBS);
 const mineGround = createGround(CELL_COUNT, bombPositions);
 const mineMap = setMineCount(mineGround);
 let openedCells = [];
-let flagedCells = " ";
+let flagedCells = [];
 let isGameDone = false;
 
 printBoardAndMessage("let's see your tactics 🤘 🤘");
@@ -238,7 +238,7 @@ while (!isGameDone) {
   //flag case...........
   if (input === "f") {
     const inputToFlag = prompt("Enter the CellNo to flag: ");
-    flagedCells = flagedCells + (" " + inputToFlag + ",");
+    flagedCells.push(inputToFlag);
     printBoardAndMessage("NIce You Have flaged Successfully");
     continue;
   }
@@ -262,7 +262,7 @@ while (!isGameDone) {
 
   // game finish case....
   if (
-    openedCells.split(",").length > SAFE_CELLS ||
+    openedCells.length > SAFE_CELLS ||
     mineMap[input - 1] === "B"
   ) {
     flagedCells = "";
