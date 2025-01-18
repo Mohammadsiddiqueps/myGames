@@ -96,21 +96,15 @@ function getLine() {
 }
 
 function getEmojiToPrint(cellValue) {
-  switch (cellValue) {
-    case "0":
-      return " 0️⃣ ";
-    case "1":
-      return " 1️⃣ ";
-    case "2":
-      return " 2️⃣ ";
-    case "3":
-      return " 3️⃣ ";
-    case "4":
-      return " 4️⃣ ";
+  if (cellValue === "B") {
+    return " 💣";
   }
 
-  return " 💣";
+  const numberEmoji = [" 0️⃣ ", " 1️⃣ ", " 2️⃣ ", " 3️⃣ ", " 4️⃣ "];
+
+  return numberEmoji[+cellValue];
 }
+//updated this much
 
 function getCharToPrint(cellNo, openedCells, string, flagedCells) {
   if (flagedCells.includes(" " + cellNo + ",")) {
