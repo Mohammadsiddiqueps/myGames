@@ -104,6 +104,7 @@ function getEmojiToPrint(cellValue) {
 
   return numberEmoji[+cellValue];
 }
+
 //updated this much
 
 function getCharToPrint(cellNo, openedCells, string, flagedCells) {
@@ -111,7 +112,7 @@ function getCharToPrint(cellNo, openedCells, string, flagedCells) {
     return " 🚩";
   }
 
-  if (openedCells.includes(" " + cellNo + ",")) {
+  if (openedCells.includes(cellNo)) {
     return getEmojiToPrint(string[cellNo - 1]);
   }
 
@@ -206,7 +207,7 @@ function getUserInput() {
   const isInputInRange = input <= CELL_COUNT && input > 0;
   const isValidInput = input === "f" || input === "e";
   const isFlaged = flagedCells.includes(" " + input + ",");
-  const isOpened = openedCells.includes(" " + input + ",");
+  const isOpened = openedCells.includes(input);
 
   if (!(isInputInRange || isValidInput) || isFlaged || isOpened) {
     console.log("Don't Enter flaged || opened cells || invalid values");
@@ -231,7 +232,7 @@ function processInput(input, flagedCells, openedCells, mineMap) {
 const bombPositions = getRandomNumbers(NO_OF_BOMBS);
 const mineGround = createGround(CELL_COUNT, bombPositions);
 const mineMap = setMineCount(mineGround);
-let openedCells = " ";
+let openedCells = [];
 let flagedCells = " ";
 let isGameDone = false;
 
@@ -255,8 +256,8 @@ while (!isGameDone) {
   }
 
   //cell open case..
-  if (!openedCells.includes(" " + input + ",")) {
-    openedCells = openedCells + +input + ", ";
+  if (!openedCells.includes(input)) {
+    openedCells.push(input);
 
     if (mineMap[input - 1] === "0") {
       openedCells = openNearCells(openedCells, +input, mineMap);
