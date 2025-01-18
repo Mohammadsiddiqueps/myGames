@@ -25,13 +25,10 @@ function createGround(limit, bombPositions) {
   return ground;
 }
 
-function getPosToIncrement(index) {
-  const isAtFirstRow = index - 10 <= 0;
-  const isAtLastRow = index + 10 > 100;
-  const isAtLeftRow = (index - 1) % 10 === 0;
-  const isAtRightRow = index % 10 === 0;
-
-  const arrayCondition = [
+const getIncrementConditions = (index) => {
+  const [isAtFirstRow, isAtLastRow, isAtLeftRow, isAtRightRow] =
+    getPositionInfo(index);
+  return [
     !isAtFirstRow && !isAtLeftRow,
     !isAtFirstRow && !isAtRightRow,
     !isAtLastRow && !isAtLeftRow,
@@ -41,6 +38,19 @@ function getPosToIncrement(index) {
     !isAtRightRow,
     !isAtLastRow,
   ];
+};
+
+const getPositionInfo = (index) => {
+  return [
+    index - 10 < 0,
+    index + 10 > 99,
+    index % 10 === 0,
+    (index + 1) % 10 === 0,
+  ];
+};
+
+function getPosToIncrement(index) {
+  const arrayCondition = getIncrementConditions(index);
 
   const indexes = [
     index - 11,
@@ -52,6 +62,7 @@ function getPosToIncrement(index) {
     index + 1,
     index + 10,
   ];
+
   return arrayCondition.reduce((a, b, i) => {
     if (b) {
       return [...a, indexes[i]];
@@ -61,17 +72,12 @@ function getPosToIncrement(index) {
 }
 
 function getIncrementedString(mineMap, posToIncrement) {
-  let incrementedString = "";
-
-  for (let cell = 0; cell < mineMap.length; cell++) {
-    const isCellToIncrement =
-      posToIncrement.includes("," + (cell + 1) + ",") && mineMap[cell] !== "B";
-    let incrementedChar = +mineMap[cell];
-
-    incrementedString += isCellToIncrement ? ++incrementedChar : mineMap[cell];
-  }
-
-  return incrementedString;
+  posToIncrement.map((x) => {
+    if (mineMap[x] !== "B") {
+      mineMap[x]++;
+    }
+  });
+  return mineMap;
 }
 
 function setMineCount(mineMap) {
