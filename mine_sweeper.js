@@ -188,11 +188,10 @@ function getBorderedMessage(message) {
 }
 
 function printBoardAndMessage(message) {
-  // console.clear();
+  console.clear();
   console.log(getBorderedMessage(message));
   console.log("\n💣 💣 💥 💥💣 𝐌 𝑰𝐍 𝑬 𝐒Ꮤ 𝑬 𝑬 𝐏 𝑬 Ʀ 💣 💣 💥 💥 💣");
   console.log(getStyledGround(openedCells, mineMap, flagedCells));
-  // console.log(openedCells);
 }
 
 function getUserInput() {
@@ -201,8 +200,8 @@ function getUserInput() {
   );
   const isInputInRange = input <= CELL_COUNT && input > 0;
   const isValidInput = input === "f" || input === "e";
-  const isFlaged = flagedCells.includes(input);
-  const isOpened = openedCells.includes(input);
+  const isFlaged = flagedCells.includes(input - 1);
+  const isOpened = openedCells.includes(input - 1);
 
   if (!(isInputInRange || isValidInput) || isFlaged || isOpened) {
     console.log("Don't Enter flaged || opened cells || invalid values");
@@ -234,13 +233,11 @@ let isGameDone = false;
 printBoardAndMessage("let's see your tactics 🤘 🤘");
 
 while (!isGameDone) {
-  // console.log(mineMap);
-  // console.log(bombPositions);
   const input = getUserInput();
   //flag case...........
   if (input === "f") {
     const inputToFlag = prompt("Enter the CellNo to flag: ");
-    flagedCells.push(Number(inputToFlag));
+    flagedCells.push(inputToFlag - 1);
     printBoardAndMessage("NIce You Have flaged Successfully");
     continue;
   }
@@ -269,12 +266,7 @@ while (!isGameDone) {
     // console.log(openedCells);
 
     isGameDone = true;
-    processInput(
-      input,
-      flagedCells,
-      [...openedCells, ...bombPositions],
-      mineMap
-    );
+    processInput(input, flagedCells, openedCells, mineMap);
   }
 }
 
