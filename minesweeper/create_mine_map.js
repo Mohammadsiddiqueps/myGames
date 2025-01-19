@@ -104,4 +104,5 @@ const getNumberToPrint = (cellNo) => {
 
   return " " + cellNo;
 };
-const displayvalues = mineMap.map((x, i) => getNumberToPrint(i + 1));
+
+export const displayvalues = mineMap.map((x, i) => getNumberToPrint(i + 1));

@@ -1,6 +1,6 @@
 export const NO_OF_BOMBS = 15;
 export const CELL_COUNT = 100;
-import { bombPositions, mineMap } from "./create_mine_map.js";
+import { bombPositions, displayvalues, mineMap } from "./create_mine_map.js";
 
 const HYPHEN = "-";
 const LINE_LENGTH = 49;
@@ -65,41 +65,48 @@ function getStyledGround(openedCells, mineMap, flagedCells) {
 
   return mineGround;
 }
-
 function openNearCells(openedCells, index) {
   const [isAtFirstRow, isAtLastRow, isAtLeftRow, isAtRightRow] =
     getPositionInfo(index);
-  console.log(isAtFirstRow, isAtLastRow, isAtLeftRow, isAtRightRow);
+  // console.log(isAtFirstRow, isAtLastRow, isAtLeftRow, isAtRightRow);
   if (!(openedCells.includes(index - 11) || isAtFirstRow || isAtLeftRow)) {
     openedCells.push(index - 11);
+    printValues[index - 11] = getEmojiToPrint(mineMap[index - 11]);
   }
 
   if (!(openedCells.includes(index - 1) || isAtLeftRow)) {
     openedCells.push(index - 1);
+    printValues[index - 1] = getEmojiToPrint(mineMap[index - 1]);
   }
 
   if (!(openedCells.includes(index + 9) || isAtLastRow || isAtLeftRow)) {
     openedCells.push(index + 9);
+    printValues[index + 9] = getEmojiToPrint(mineMap[index + 9]);
   }
 
   if (!(openedCells.includes(index - 10) || isAtFirstRow)) {
     openedCells.push(index - 10);
+    printValues[index - 10] = getEmojiToPrint(mineMap[index - 10]);
   }
 
   if (!(openedCells.includes(index + 10) || isAtLastRow)) {
     openedCells.push(index + 10);
+    printValues[index + 10] = getEmojiToPrint(mineMap[index + 10]);
   }
 
   if (!(openedCells.includes(index + 1) || isAtRightRow)) {
     openedCells.push(index + 1);
+    printValues[index + 1] = getEmojiToPrint(mineMap[index + 1]);
   }
 
   if (!(openedCells.includes(index - 9) || isAtRightRow || isAtFirstRow)) {
     openedCells.push(index - 9);
+    printValues[index - 9] = getEmojiToPrint(mineMap[index - 9]);
   }
 
   if (!(openedCells.includes(index + 11) || isAtRightRow || isAtLastRow)) {
     openedCells.push(index + 11);
+    printValues[index + 11] = getEmojiToPrint(mineMap[index + 11]);
   }
 
   return openedCells;
@@ -147,9 +154,12 @@ function processInput(input, flagedCells, openedCells, mineMap) {
   }
 }
 
+const getOpenedEmoji = (index) => {};
 // const bombPositions = getRandomNumbers(NO_OF_BOMBS, []);
 // const mineGround = createGround(CELL_COUNT, bombPositions);
 // const mineMap = setMineCount(mineGround);
+
+const printValues = displayvalues;
 let openedCells = [];
 let flagedCells = [];
 let isGameDone = false;
@@ -163,6 +173,7 @@ while (!isGameDone) {
   //flag case...........
   if (input === "f") {
     const inputToFlag = prompt("Enter the CellNo to flag: ");
+    printValues[inputToFlag - 1] = " 🚩"; //
     flagedCells.push(inputToFlag - 1);
     printBoardAndMessage("NIce You Have flaged Successfully");
     continue;
@@ -176,6 +187,7 @@ while (!isGameDone) {
 
   //cell open case..
   if (!openedCells.includes(input)) {
+    printValues[input - 1] = getEmojiToPrint(mineMap[input - 1]);
     openedCells.push(input - 1);
 
     if (mineMap[input - 1] === 0) {
@@ -188,12 +200,16 @@ while (!isGameDone) {
   // game finish case....
   if (openedCells.length > SAFE_CELLS || mineMap[input - 1] === "B") {
     flagedCells = [];
+    bombPositions.map((x) => {
+      printValues[x] = " 💣";
+    });
     openedCells = [...openedCells, ...bombPositions];
     // console.log(openedCells);
 
     isGameDone = true;
     processInput(input, flagedCells, openedCells, mineMap);
   }
+  console.log(printValues);
 }
 const endingTime = performance.now();
 
