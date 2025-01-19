@@ -31,27 +31,7 @@ function getEmojiToPrint(cellValue) {
 
 //updated this much
 
-function getCharToPrint(cellNo, openedCells, string, flagedCells) {
-  if (flagedCells.includes(cellNo - 1)) {
-    return " 🚩";
-  }
-
-  if (openedCells.includes(cellNo - 1)) {
-    return getEmojiToPrint(string[cellNo - 1]);
-  }
-
-  if (cellNo < 10) {
-    return " 0" + cellNo;
-  }
-
-  if (cellNo >= 100) {
-    return cellNo;
-  }
-
-  return " " + cellNo;
-}
-
-function getStyledGround(openedCells, mineMap, flagedCells) {
+function getStyledGround() {
   const line = getLine(LINE_LENGTH);
   let mineGround = "\n " + line + "\n";
 
@@ -131,15 +111,12 @@ function getUserInput() {
   );
   const isInputInRange = input <= CELL_COUNT && input > 0;
   const isValidInput = input === "f" || input === "e";
-  const isFlaged = flagedCells.includes(input - 1);
-  const isOpened = openedCells.includes(input - 1);
 
-  if (!(isInputInRange || isValidInput) || isFlaged || isOpened) {
-    console.log("Don't Enter flaged || opened cells || invalid values");
-    return getUserInput();
+  if ((isInputInRange && Number(printValues[input - 1])) || isValidInput) {
+    return input;
   }
-
-  return input;
+  console.log("Don't Enter flaged || opened cells || invalid values");
+  return getUserInput();
 }
 
 function processInput(input, flagedCells, openedCells, mineMap) {
@@ -153,11 +130,6 @@ function processInput(input, flagedCells, openedCells, mineMap) {
     );
   }
 }
-
-const getOpenedEmoji = (index) => {};
-// const bombPositions = getRandomNumbers(NO_OF_BOMBS, []);
-// const mineGround = createGround(CELL_COUNT, bombPositions);
-// const mineMap = setMineCount(mineGround);
 
 const printValues = displayvalues;
 let openedCells = [];
