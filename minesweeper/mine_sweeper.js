@@ -1,44 +1,10 @@
-const NO_OF_BOMBS = 15;
-const CELL_COUNT = 100;
+export const NO_OF_BOMBS = 15;
+export const CELL_COUNT = 100;
+import { bombPositions, mineMap } from "./create_mine_map.js";
+
 const HYPHEN = "-";
 const LINE_LENGTH = 49;
 const SAFE_CELLS = CELL_COUNT - NO_OF_BOMBS;
-
-const getRandomNumbers = (noOfBombs, bombPositions) => {
-  if (bombPositions.length === noOfBombs) {
-    return bombPositions;
-  }
-
-  const randomNumber = Math.floor(Math.random() * 100);
-
-  if (bombPositions.includes(randomNumber)) {
-    return getRandomNumbers(noOfBombs, bombPositions);
-  }
-
-  return getRandomNumbers(noOfBombs, [...bombPositions, randomNumber]);
-};
-
-function createGround(limit, bombPositions) {
-  const ground = Array(limit).fill(0);
-  bombPositions.map((x) => (ground[x] = "B"));
-
-  return ground;
-}
-
-const getIncrementConditions = (index) => {
-  const [isAtFirstRow, isAtLastRow, isAtLeftRow, isAtRightRow] =
-    getPositionInfo(index);
-  return [
-    !isAtFirstRow && !isAtLeftRow,
-    !isAtFirstRow && !isAtRightRow,
-    !isAtLastRow && !isAtLeftRow,
-    !isAtLastRow && !isAtRightRow,
-    !isAtLeftRow,
-    !isAtFirstRow,
-    !isAtRightRow,
-    !isAtLastRow,
-  ];
-};
 
 const getPositionInfo = (index) => {
   return [
@@ -48,48 +14,6 @@ const getPositionInfo = (index) => {
     (index + 1) % 10 === 0,
   ];
 };
-
-function getPosToIncrement(index) {
-  const arrayCondition = getIncrementConditions(index);
-
-  const indexes = [
-    index - 11,
-    index - 9,
-    index + 9,
-    index + 11,
-    index - 1,
-    index - 10,
-    index + 1,
-    index + 10,
-  ];
-
-  return arrayCondition.reduce((a, b, i) => {
-    if (b) {
-      return [...a, indexes[i]];
-    }
-    return [...a];
-  }, []);
-}
-
-function getIncrementedString(mineMap, posToIncrement) {
-  posToIncrement.map((x) => {
-    if (mineMap[x] !== "B") {
-      mineMap[x]++;
-    }
-  });
-  return mineMap;
-}
-
-function setMineCount(mineMap) {
-  for (let index = 0; index < mineMap.length; index++) {
-    if (mineMap[index] === "B") {
-      const posToIncrement = getPosToIncrement(index);
-      mineMap = getIncrementedString(mineMap, posToIncrement);
-    }
-  }
-
-  return mineMap;
-}
 
 function getLine() {
   return HYPHEN.repeat(LINE_LENGTH);
@@ -145,7 +69,7 @@ function getStyledGround(openedCells, mineMap, flagedCells) {
 function openNearCells(openedCells, index) {
   const [isAtFirstRow, isAtLastRow, isAtLeftRow, isAtRightRow] =
     getPositionInfo(index);
-
+  console.log(isAtFirstRow, isAtLastRow, isAtLeftRow, isAtRightRow);
   if (!(openedCells.includes(index - 11) || isAtFirstRow || isAtLeftRow)) {
     openedCells.push(index - 11);
   }
@@ -188,7 +112,7 @@ function getBorderedMessage(message) {
 }
 
 function printBoardAndMessage(message) {
-  console.clear();
+  // console.clear();
   console.log(getBorderedMessage(message));
   console.log("\n💣 💣 💥 💥💣 𝐌 𝑰𝐍 𝑬 𝐒Ꮤ 𝑬 𝑬 𝐏 𝑬 Ʀ 💣 💣 💥 💥 💣");
   console.log(getStyledGround(openedCells, mineMap, flagedCells));
@@ -223,15 +147,15 @@ function processInput(input, flagedCells, openedCells, mineMap) {
   }
 }
 
-const bombPositions = getRandomNumbers(NO_OF_BOMBS, []);
-const mineGround = createGround(CELL_COUNT, bombPositions);
-const mineMap = setMineCount(mineGround);
+// const bombPositions = getRandomNumbers(NO_OF_BOMBS, []);
+// const mineGround = createGround(CELL_COUNT, bombPositions);
+// const mineMap = setMineCount(mineGround);
 let openedCells = [];
 let flagedCells = [];
 let isGameDone = false;
 
 printBoardAndMessage("let's see your tactics 🤘 🤘");
-const startingTime = performance.now()
+const startingTime = performance.now();
 // Your program code here
 
 while (!isGameDone) {
@@ -254,8 +178,8 @@ while (!isGameDone) {
   if (!openedCells.includes(input)) {
     openedCells.push(input - 1);
 
-    if (mineMap[input - 1] === "0") {
-      openedCells = openNearCells(openedCells, +input, mineMap);
+    if (mineMap[input - 1] === 0) {
+      openedCells = openNearCells(openedCells, input - 1);
     }
 
     printBoardAndMessage("NIce MOve");
@@ -271,7 +195,7 @@ while (!isGameDone) {
     processInput(input, flagedCells, openedCells, mineMap);
   }
 }
-const endingTime = performance.now()
+const endingTime = performance.now();
 
 // console.log(bombPositions);
 // console.log(openedCells.split(",").length - 1);
