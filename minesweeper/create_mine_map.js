@@ -90,5 +90,18 @@ function setMineCount(mineMap) {
 console.log(NO_OF_BOMBS, CELL_COUNT);
 
 export const bombPositions = getBombPositions(NO_OF_BOMBS, []);
- const mineGround = createGround(CELL_COUNT, bombPositions);
+const mineGround = createGround(CELL_COUNT, bombPositions);
 export const mineMap = setMineCount(mineGround);
+
+const getNumberToPrint = (cellNo) => {
+  if (cellNo < 10) {
+    return " 0" + cellNo;
+  }
+
+  if (cellNo >= 100) {
+    return String(cellNo);
+  }
+
+  return " " + cellNo;
+};
+const displayvalues = mineMap.map((x, i) => getNumberToPrint(i + 1));
