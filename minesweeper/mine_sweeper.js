@@ -56,7 +56,7 @@ function getStyledGround(openedCells, mineMap, flagedCells) {
   let mineGround = "\n " + line + "\n";
 
   for (let cellNo = 1; cellNo <= CELL_COUNT; cellNo++) {
-    const character = getCharToPrint(cellNo, openedCells, mineMap, flagedCells);
+    const character = printValues[cellNo - 1];
     const cellDesign = "┃" + character + " ";
     const isItTenthCell = cellNo % 10 === 0 ? "┃\n┃" + line + "┃\n" : "";
 
@@ -209,7 +209,7 @@ while (!isGameDone) {
     isGameDone = true;
     processInput(input, flagedCells, openedCells, mineMap);
   }
-  console.log(printValues);
+  // console.log(printValues);
 }
 const endingTime = performance.now();
 
