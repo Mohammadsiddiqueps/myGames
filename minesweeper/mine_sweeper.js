@@ -29,12 +29,12 @@ const getIncrementConditions = (index) => {
   const [isAtFirstRow, isAtLastRow, isAtLeftRow, isAtRightRow] =
     getPositionInfo(index);
   return [
-    !isAtFirstRow && !isAtLeftRow, //
-    !isAtFirstRow && !isAtRightRow, //
+    !isAtFirstRow && !isAtLeftRow,
+    !isAtFirstRow && !isAtRightRow,
     !isAtLastRow && !isAtLeftRow,
     !isAtLastRow && !isAtRightRow,
     !isAtLeftRow,
-    !isAtFirstRow, //
+    !isAtFirstRow,
     !isAtRightRow,
     !isAtLastRow,
   ];
@@ -231,6 +231,8 @@ let flagedCells = [];
 let isGameDone = false;
 
 printBoardAndMessage("let's see your tactics 🤘 🤘");
+const startingTime = performance.now()
+// Your program code here
 
 while (!isGameDone) {
   const input = getUserInput();
@@ -269,6 +271,7 @@ while (!isGameDone) {
     processInput(input, flagedCells, openedCells, mineMap);
   }
 }
+const endingTime = performance.now()
 
 // console.log(bombPositions);
 // console.log(openedCells.split(",").length - 1);
