@@ -36,17 +36,12 @@ class ConnectFourServer {
     await opponent.conn.write(new TextEncoder().encode("WAIT\n"));
 
     const buff = new Uint8Array(1024);
-    console.log("Awaiting input...");
     const byteCount = await player.conn.read(buff);
-    console.log("Byte count received:", byteCount);
 
     const input = new TextDecoder().decode(buff.slice(0, byteCount)).trim();
     console.log(`Input from ${player.name}:`, input);
 
     this.processMove(player, input);
-
-    // Introduce a small delay before sending "MOVE" to avoid message merging
-    // await new Promise((resolve) => setTimeout(resolve, 50));
 
     await player.conn.write(new TextEncoder().encode(`MOVE:${input}\n`));
     await opponent.conn.write(new TextEncoder().encode(`MOVE:${input}\n`));
@@ -68,8 +63,6 @@ const allPlayers = [];
 for await (const conn of listener) {
   const buff = new Uint8Array(1024);
   const byteCount = await conn.read(buff);
-
-  if (!byteCount) continue; // Ignore empty reads
 
   const name = new TextDecoder().decode(buff.slice(0, byteCount)).trim();
   allPlayers.push({ conn, name });
