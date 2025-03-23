@@ -4,20 +4,15 @@ class ConnectFourClient {
   async init(port) {
     this.connection = await Deno.connect({ port });
 
-    await this.sendName();
     await this.gameIntro();
     await this.gameLoop();
   }
 
-  async sendName() {
-    this.name = prompt("Enter Your Name: ");
-    console.log("This is the name user gave:", this.name);
-    await this.connection.write(new TextEncoder().encode(this.name));
-    console.log("Name has been sent.");
-  }
-
   async gameIntro() {
-    console.log("Waiting for the opponent...");
+    this.name = prompt("Enter Your Name: ");
+
+    await this.connection.write(new TextEncoder().encode(this.name));
+    console.log("You have registered...\nWaiting for the opponent...");
 
     const startMsg = await this.readMessage();
     console.log(startMsg);
@@ -58,7 +53,7 @@ class ConnectFourClient {
   async readMessage() {
     const buff = new Uint8Array(1024);
     const byteCount = await this.connection.read(buff);
-    // if (!byteCount) return "";
+    
     return new TextDecoder().decode(buff.slice(0, byteCount)).trim();
   }
 }
