@@ -1,46 +1,85 @@
-class Serve {
-  constructor(port) {
-    this.listener = Deno.listen({ port });
+class ConnectFourServer {
+  constructor(player1, player2) {
+    this.player1 = player1;
+    this.player2 = player2;
+    this.currentPlayer = player1;
   }
 
-  format() {
-    return new TransformStream({
-      transform(msg, controller) {
-        const [currentTime] = Date().match(/\d+:\d+:\d+/);
+  async startGame() {
+    this.player1.conn.write(
+      new TextEncoder().encode(
+        `Game Started! You are playing against ${this.player2.name}\n`
+      )
+    );
 
-        const formatted = currentTime + ": " + msg;
-        controller.enqueue(formatted);
-      },
-    });
-  }
+    this.player2.conn.write(
+      new TextEncoder().encode(
+        `Game Started! You are playing against ${this.player1.name}\n`
+      )
+    );
 
-  async handleConnection(conn) {
-    await conn.readable
-      .pipeThrough(new TextDecoderStream())
-      .pipeThrough(this.format())
-      .pipeThrough(new TextEncoderStream())
-      .pipeTo(conn.writable);
-  }
-
-  async connector() {
-    const allPlayers = new Set();
-
-    for await (const conn of this.listener) {
-      allPlayers.add(conn);
-      console.log("connected to the client", allPlayers);
-
-      if (allPlayers.size >= 2) {
-        const [player1, player2] = allPlayers;
-        allPlayers.delete(player1);
-        allPlayers.delete(player2);
-
-        // this.startGame(player1, player2);
-        console.log(player1, player2, "game starts");
-      }
+    while (true) {
+      await this.delay(200);
+      const opponent =
+        this.currentPlayer === this.player1 ? this.player2 : this.player1;
+      await this.handlePlayerTurn(this.currentPlayer, opponent);
+      this.swapTurn();
     }
+  }
+
+  delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  async handlePlayerTurn(player, opponent) {
+    await player.conn.write(new TextEncoder().encode("TURN\n"));
+    await opponent.conn.write(new TextEncoder().encode("WAIT\n"));
+
+    const buff = new Uint8Array(1024);
+    console.log("Awaiting input...");
+    const byteCount = await player.conn.read(buff);
+    console.log("Byte count received:", byteCount);
+
+    const input = new TextDecoder().decode(buff.slice(0, byteCount)).trim();
+    console.log(`Input from ${player.name}:`, input);
+
+    this.processMove(player, input);
+
+    // Introduce a small delay before sending "MOVE" to avoid message merging
+    // await new Promise((resolve) => setTimeout(resolve, 50));
+
+    await player.conn.write(new TextEncoder().encode(`MOVE:${input}\n`));
+    await opponent.conn.write(new TextEncoder().encode(`MOVE:${input}\n`));
+  }
+
+  processMove(player, input) {
+    console.log(`${player.name} played: ${input}`);
+  }
+
+  swapTurn() {
+    this.currentPlayer =
+      this.currentPlayer === this.player1 ? this.player2 : this.player1;
   }
 }
 
-const server = new Serve(8000);
-server.connector();
-console.log("listening to the port");
+const listener = Deno.listen({ port: 8000 });
+const allPlayers = [];
+
+for await (const conn of listener) {
+  const buff = new Uint8Array(1024);
+  const byteCount = await conn.read(buff);
+
+  if (!byteCount) continue; // Ignore empty reads
+
+  const name = new TextDecoder().decode(buff.slice(0, byteCount)).trim();
+  allPlayers.push({ conn, name });
+
+  console.log(`Connected to client: ${name}`);
+
+  if (allPlayers.length >= 2) {
+    const [player1, player2] = allPlayers.splice(0, 2);
+    const game = new ConnectFourServer(player1, player2);
+    game.startGame();
+    console.log(`Game started between ${player1.name} and ${player2.name}`);
+  }
+}
