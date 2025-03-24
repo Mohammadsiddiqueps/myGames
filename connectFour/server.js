@@ -24,8 +24,10 @@ class ConnectFourServer {
 
     while (true) {
       await this.delay(200);
+
       const opponent =
         this.currentPlayer === this.player1 ? this.player2 : this.player1;
+      
       await this.handlePlayerTurn(this.currentPlayer, opponent);
       this.currentPlayer = opponent;
     }
@@ -55,31 +57,35 @@ class ConnectFourServer {
   writeMsg(conn, msg) {
     conn.write(new TextEncoder().encode(JSON.stringify(msg)));
   }
-
-  swapTurn() {
-    this.currentPlayer =
-      this.currentPlayer === this.player1 ? this.player2 : this.player1;
-  }
 }
 
-const listener = Deno.listen({ port: 8000 });
-const allPlayers = [];
-
-for await (const conn of listener) {
+const handleClient = async (conn, allPlayers) => {
   const buff = new Uint8Array(1024);
   const byteCount = await conn.read(buff);
-
   const name = new TextDecoder().decode(buff.slice(0, byteCount)).trim();
-  allPlayers.push({ conn, name });
 
+  allPlayers.push({ conn, name });
   console.log(`Connected to client: ${name}`);
 
   if (allPlayers.length >= 2) {
     const [player1, player2] = allPlayers.splice(0, 2);
     player1.color = PLAYER1_COLOUR;
     player2.color = PLAYER2_COLOUR;
+
     const game = new ConnectFourServer(player1, player2);
     game.startGame();
+
     console.log(`Game started between ${player1.name} and ${player2.name}`);
   }
-}
+};
+
+const main = async () => {
+  const listener = Deno.listen({ port: 8000 });
+  const allPlayers = [];
+
+  for await (const conn of listener) {
+    handleClient(conn, allPlayers);
+  }
+};
+
+main();
