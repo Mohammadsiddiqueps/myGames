@@ -1,9 +1,9 @@
-import { getUserInput } from "./connect_four.js";
+import { getBoard, getMapStructure, getUserInput } from "./connect_four.js";
 
 class ConnectFourClient {
   async init(port) {
     this.connection = await Deno.connect({ port });
-
+    this.connectMap = getMapStructure();
     await this.gameIntro();
     await this.gameLoop();
   }
@@ -14,8 +14,13 @@ class ConnectFourClient {
     await this.connection.write(new TextEncoder().encode(this.name));
     console.log("You have registered...\nWaiting for the opponent...");
 
-    const startMsg = await this.readMessage();
-    console.log(startMsg);
+    const matchDetails = JSON.parse(await this.readMessage());
+    this.color = matchDetails.color;
+    this.opponent = matchDetails.opponent;
+
+    console.log(
+      `Game Started! You are playing against ${this.opponent}\n Your Color is ${this.color}`
+    );
   }
 
   async gameLoop() {
@@ -41,8 +46,8 @@ class ConnectFourClient {
   }
 
   async handleTurn() {
-    console.log("Your turn! 🎮");
-    const playerInput = prompt("Enter Column No to Drop: ");
+    console.log(getBoard(this.connectMap));
+    const playerInput = getUserInput(this.name, this.connectMap);
     console.log("This is the input of the player:", playerInput);
     await this.connection.write(new TextEncoder().encode(playerInput));
 
@@ -53,7 +58,7 @@ class ConnectFourClient {
   async readMessage() {
     const buff = new Uint8Array(1024);
     const byteCount = await this.connection.read(buff);
-    
+
     return new TextDecoder().decode(buff.slice(0, byteCount)).trim();
   }
 }

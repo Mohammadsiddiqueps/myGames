@@ -1,3 +1,6 @@
+const PLAYER1_COLOUR = "🟢";
+const PLAYER2_COLOUR = "🔵";
+
 class ConnectFourServer {
   constructor(player1, player2) {
     this.player1 = player1;
@@ -8,13 +11,19 @@ class ConnectFourServer {
   async startGame() {
     this.player1.conn.write(
       new TextEncoder().encode(
-        `Game Started! You are playing against ${this.player2.name}\n`
+        JSON.stringify({
+          opponent: this.player2.name,
+          color: this.player1.color,
+        })
       )
     );
 
     this.player2.conn.write(
       new TextEncoder().encode(
-        `Game Started! You are playing against ${this.player1.name}\n`
+        JSON.stringify({
+          opponent: this.player1.name,
+          color: this.player2.color,
+        })
       )
     );
 
@@ -71,6 +80,8 @@ for await (const conn of listener) {
 
   if (allPlayers.length >= 2) {
     const [player1, player2] = allPlayers.splice(0, 2);
+    player1.color = PLAYER1_COLOUR;
+    player2.color = PLAYER2_COLOUR;
     const game = new ConnectFourServer(player1, player2);
     game.startGame();
     console.log(`Game started between ${player1.name} and ${player2.name}`);
