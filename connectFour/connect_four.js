@@ -80,7 +80,6 @@ export function getUserInput(player, connectMap, ballColour) {
     return getUserInput(player, connectMap, ballColour);
   }
 
-  
   return { playerInput, dropPosition };
 }
 
@@ -94,7 +93,7 @@ function checkCells(connectMap, index, adder, ballColour) {
   return true;
 }
 
-function isPlayerWin(connectMap, ballColour) {
+export function isPlayerWin(connectMap, ballColour) {
   for (let index = 0; index < connectMap.length; index++) {
     if (connectMap[index] === ballColour) {
       const isItWonRow = checkCells(connectMap, index, 1, ballColour);

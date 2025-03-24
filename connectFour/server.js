@@ -1,3 +1,4 @@
+import { getMapStructure, isPlayerWin } from "./connect_four.js";
 import { readMsg, writeMsg } from "./util.js";
 
 const PLAYER1_COLOUR = "🟢";
@@ -8,6 +9,8 @@ class ConnectFourServer {
     this.player1 = player1;
     this.player2 = player2;
     this.currentPlayer = player1;
+    this.gameOver = false;
+    this.connectMap = getMapStructure();
   }
 
   async startGame() {
@@ -24,7 +27,7 @@ class ConnectFourServer {
     writeMsg(this.player1.conn, player1Info);
     writeMsg(this.player2.conn, player2Info);
 
-    while (true) {
+    while (!this.gameOver) {
       await this.delay(200);
 
       const opponent =
@@ -41,10 +44,13 @@ class ConnectFourServer {
       this.currentPlayer = opponent;
     }
   }
-  
-  handleGameExit() {
-    this.player1.conn.close();
-    this.player2.conn.close();
+
+  async handleGameExit() {
+    this.gameOver = true;
+
+    await this.player1.conn.close();
+    await this.player2.conn.close();
+
   }
 
   delay(ms) {
@@ -57,11 +63,22 @@ class ConnectFourServer {
 
     const input = await readMsg(player.conn);
 
-    this.processMove(player, input);
     writeMsg(opponent.conn, input);
+    this.processMove(player, input);
   }
 
-  processMove(player, input) {
+  async processMove(player, input) {
+    this.connectMap[input.dropPosition] = player.color;
+
+    if (isPlayerWin(this.connectMap, player.color)) {
+      console.log(player.name + " won the match.....🏆🥇\n");
+
+      writeMsg(this.player1.conn, { option: "win", winner: player.name });
+      writeMsg(this.player2.conn, { option: "win", winner: player.name });
+
+      await this.handleGameExit();
+    }
+
     console.log(`${player.name} played: ${input.playerInput}`);
   }
 }

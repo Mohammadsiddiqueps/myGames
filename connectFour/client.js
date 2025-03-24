@@ -39,6 +39,11 @@ class ConnectFourClient {
       try {
         const message = await readMsg(this.connection);
 
+        if (message.option === "win") {
+          console.log(`${message.winner} won the match.....🏆🥇\n`);
+          Deno.exit();
+        }
+        
         if (message.option === "WAIT") {
           await this.handleOpponentMove();
           continue;
