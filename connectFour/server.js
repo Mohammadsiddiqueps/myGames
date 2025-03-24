@@ -30,9 +30,21 @@ class ConnectFourServer {
       const opponent =
         this.currentPlayer === this.player1 ? this.player2 : this.player1;
 
-      await this.handlePlayerTurn(this.currentPlayer, opponent);
+      try {
+        await this.handlePlayerTurn(this.currentPlayer, opponent);
+      } catch {
+        console.error("client disconnected");
+        this.handleGameExit();
+        break;
+      }
+
       this.currentPlayer = opponent;
     }
+  }
+  
+  handleGameExit() {
+    this.player1.conn.close();
+    this.player2.conn.close();
   }
 
   delay(ms) {
@@ -40,18 +52,16 @@ class ConnectFourServer {
   }
 
   async handlePlayerTurn(player, opponent) {
-    await player.conn.write(new TextEncoder().encode("TURN"));
-    await opponent.conn.write(new TextEncoder().encode("WAIT"));
+    writeMsg(player.conn, { option: "TURN" });
+    writeMsg(opponent.conn, { option: "WAIT" });
 
     const input = await readMsg(player.conn);
-    
+
     this.processMove(player, input);
     writeMsg(opponent.conn, input);
   }
 
   processMove(player, input) {
-    console.log(input);
-
     console.log(`${player.name} played: ${input.playerInput}`);
   }
 }

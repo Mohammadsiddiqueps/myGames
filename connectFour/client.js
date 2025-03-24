@@ -4,11 +4,12 @@ import {
   getMapStructure,
   getUserInput,
 } from "./connect_four.js";
+
 import { readMsg, writeMsg } from "./util.js";
 
 class ConnectFourClient {
   async init(port) {
-    this.connection = await Deno.connect({ port });
+    this.connection = await Deno.connect({ port, hostname: "" });
     this.connectMap = getMapStructure();
 
     await this.gameIntro();
@@ -22,7 +23,6 @@ class ConnectFourClient {
     console.log("You have registered...\nWaiting for the opponent...");
 
     const matchDetails = await readMsg(this.connection);
-    console.log("this is match details", matchDetails);
 
     this.color = matchDetails.color;
     this.opponent = matchDetails.opponent;
@@ -36,20 +36,25 @@ class ConnectFourClient {
     console.log(getBoard(this.connectMap));
 
     while (true) {
-      const serverMessage = await this.readMsg();
+      try {
+        const message = await readMsg(this.connection);
 
-      if (serverMessage === "WAIT") {
-        await this.handleOpponentMove();
-        continue;
+        if (message.option === "WAIT") {
+          await this.handleOpponentMove();
+          continue;
+        }
+
+        this.handleTurn();
+      } catch {
+        console.error("the other player disconnected");
+        break;
       }
-
-      await this.handleTurn();
     }
   }
 
   async handleOpponentMove() {
-    console.log("Opponent is playing...⏳");
-    const opponentMove = JSON.parse(await this.readMsg());
+    console.log(`${this.opponent} is playing...⏳`);
+    const opponentMove = await readMsg(this.connection);
 
     animateDrop(
       opponentMove.dropPosition,
@@ -59,14 +64,9 @@ class ConnectFourClient {
     );
   }
 
-  async handleTurn() {
+  handleTurn() {
     const inputInfo = getUserInput(this.name, this.connectMap, this.color);
-
-    await this.connection.write(
-      new TextEncoder().encode(
-        JSON.stringify({ ...inputInfo, color: this.color })
-      )
-    );
+    writeMsg(this.connection, { ...inputInfo, color: this.color });
 
     animateDrop(
       inputInfo.dropPosition,
@@ -74,17 +74,6 @@ class ConnectFourClient {
       this.color,
       inputInfo.playerInput - 1
     );
-  }
-
-  writeMsg(conn, msg) {
-    conn.write(new TextEncoder().encode(JSON.stringify(msg)));
-  }
-
-  async readMsg() {
-    const buff = new Uint8Array(1024);
-    const byteCount = await this.connection.read(buff);
-
-    return new TextDecoder().decode(buff.slice(0, byteCount)).trim();
   }
 }
 

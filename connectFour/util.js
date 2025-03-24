@@ -5,6 +5,8 @@ export const readMsg = async (conn) => {
   const msg = buff.slice(0, byteCount);
   const decodedMsg = new TextDecoder().decode(msg).trim();
 
+  if(!decodedMsg) throw new Error("Client disconnected"); 
+
   return JSON.parse(decodedMsg);
 };
 
