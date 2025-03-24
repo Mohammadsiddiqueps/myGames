@@ -52,8 +52,8 @@ class ConnectFourServer {
 
     this.processMove(player, input);
 
-    await player.conn.write(new TextEncoder().encode(`MOVE:${input}\n`));
-    await opponent.conn.write(new TextEncoder().encode(`MOVE:${input}\n`));
+    await player.conn.write(new TextEncoder().encode(input));
+    await opponent.conn.write(new TextEncoder().encode(input));
   }
 
   processMove(player, input) {
