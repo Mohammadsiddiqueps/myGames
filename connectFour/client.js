@@ -1,9 +1,10 @@
-import { getBoard, getMapStructure, getUserInput } from "./connect_four.js";
+import { animateDrop, getBoard, getMapStructure, getUserInput } from "./connect_four.js";
 
 class ConnectFourClient {
   async init(port) {
     this.connection = await Deno.connect({ port });
     this.connectMap = getMapStructure();
+
     await this.gameIntro();
     await this.gameLoop();
   }
@@ -14,7 +15,7 @@ class ConnectFourClient {
     await this.connection.write(new TextEncoder().encode(this.name));
     console.log("You have registered...\nWaiting for the opponent...");
 
-    const matchDetails = JSON.parse(await this.readMessage());
+    const matchDetails = JSON.parse(await this.readMsg());
     this.color = matchDetails.color;
     this.opponent = matchDetails.opponent;
 
@@ -27,7 +28,7 @@ class ConnectFourClient {
     while (true) {
       console.log("Waiting for the server message...");
 
-      const serverMessage = await this.readMessage();
+      const serverMessage = await this.readMsg();
       console.log("Server message:", serverMessage);
 
       if (serverMessage === "WAIT") {
@@ -41,21 +42,40 @@ class ConnectFourClient {
 
   async handleOpponentMove() {
     console.log("Opponent is playing...⏳");
-    const move = await this.readMessage();
-    console.log("Opponent's move:", move);
+    const opponentMove = JSON.parse(await this.readMsg());
+    animateDrop(
+      opponentMove.dropPosition,
+      this.connectMap,
+      opponentMove.color,
+      opponentMove.playerInput - 1
+    );
+
+    console.log("Opponent's move:", opponentMove);
   }
 
   async handleTurn() {
     console.log(getBoard(this.connectMap));
-    const playerInput = getUserInput(this.name, this.connectMap);
-    console.log("This is the input of the player:", playerInput);
-    await this.connection.write(new TextEncoder().encode(playerInput));
+    const inputInfo = getUserInput(this.name, this.connectMap, this.color);
+    console.log("This is the input of the player:", inputInfo);
+    await this.connection.write(
+      new TextEncoder().encode(
+        JSON.stringify({ ...inputInfo, color: this.color })
+      )
+    );
 
-    const move = await this.readMessage();
+    const move = await this.readMsg();
+    animateDrop(
+      inputInfo.dropPosition,
+      this.connectMap,
+      this.color,
+      inputInfo.playerInput - 1
+    );
+
     console.log("My move:", move);
   }
 
-  async readMessage() {
+  // asyn writeMsg
+  async readMsg() {
     const buff = new Uint8Array(1024);
     const byteCount = await this.connection.read(buff);
 
