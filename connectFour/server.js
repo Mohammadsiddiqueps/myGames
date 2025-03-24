@@ -1,3 +1,5 @@
+import { readMsg, writeMsg } from "./util.js";
+
 const PLAYER1_COLOUR = "🟢";
 const PLAYER2_COLOUR = "🔵";
 
@@ -19,15 +21,15 @@ class ConnectFourServer {
       color: this.player2.color,
     };
 
-    this.writeMsg(this.player1.conn, player1Info);
-    this.writeMsg(this.player2.conn, player2Info);
+    writeMsg(this.player1.conn, player1Info);
+    writeMsg(this.player2.conn, player2Info);
 
     while (true) {
       await this.delay(200);
 
       const opponent =
         this.currentPlayer === this.player1 ? this.player2 : this.player1;
-      
+
       await this.handlePlayerTurn(this.currentPlayer, opponent);
       this.currentPlayer = opponent;
     }
@@ -41,29 +43,21 @@ class ConnectFourServer {
     await player.conn.write(new TextEncoder().encode("TURN"));
     await opponent.conn.write(new TextEncoder().encode("WAIT"));
 
-    const buff = new Uint8Array(1024);
-    const byteCount = await player.conn.read(buff);
-
-    const input = new TextDecoder().decode(buff.slice(0, byteCount)).trim();
+    const input = await readMsg(player.conn);
+    
     this.processMove(player, input);
-
-    await opponent.conn.write(new TextEncoder().encode(input));
+    writeMsg(opponent.conn, input);
   }
 
   processMove(player, input) {
-    console.log(`${player.name} played: ${input}`);
-  }
+    console.log(input);
 
-  writeMsg(conn, msg) {
-    conn.write(new TextEncoder().encode(JSON.stringify(msg)));
+    console.log(`${player.name} played: ${input.playerInput}`);
   }
 }
 
 const handleClient = async (conn, allPlayers) => {
-  const buff = new Uint8Array(1024);
-  const byteCount = await conn.read(buff);
-  const name = new TextDecoder().decode(buff.slice(0, byteCount)).trim();
-
+  const { name } = await readMsg(conn);
   allPlayers.push({ conn, name });
   console.log(`Connected to client: ${name}`);
 

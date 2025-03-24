@@ -4,6 +4,7 @@ import {
   getMapStructure,
   getUserInput,
 } from "./connect_four.js";
+import { readMsg, writeMsg } from "./util.js";
 
 class ConnectFourClient {
   async init(port) {
@@ -16,11 +17,13 @@ class ConnectFourClient {
 
   async gameIntro() {
     this.name = prompt("Enter Your Name: ");
+    writeMsg(this.connection, { name: this.name });
 
-    await this.connection.write(new TextEncoder().encode(this.name));
     console.log("You have registered...\nWaiting for the opponent...");
 
-    const matchDetails = JSON.parse(await this.readMsg());
+    const matchDetails = await readMsg(this.connection);
+    console.log("this is match details", matchDetails);
+
     this.color = matchDetails.color;
     this.opponent = matchDetails.opponent;
 
