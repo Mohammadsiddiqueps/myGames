@@ -9,30 +9,25 @@ class ConnectFourServer {
   }
 
   async startGame() {
-    this.player1.conn.write(
-      new TextEncoder().encode(
-        JSON.stringify({
-          opponent: this.player2.name,
-          color: this.player1.color,
-        })
-      )
-    );
+    const player1Info = {
+      opponent: this.player2.name,
+      color: this.player1.color,
+    };
 
-    this.player2.conn.write(
-      new TextEncoder().encode(
-        JSON.stringify({
-          opponent: this.player1.name,
-          color: this.player2.color,
-        })
-      )
-    );
+    const player2Info = {
+      opponent: this.player1.name,
+      color: this.player2.color,
+    };
+
+    this.writeMsg(this.player1.conn, player1Info);
+    this.writeMsg(this.player2.conn, player2Info);
 
     while (true) {
       await this.delay(200);
       const opponent =
         this.currentPlayer === this.player1 ? this.player2 : this.player1;
       await this.handlePlayerTurn(this.currentPlayer, opponent);
-      this.swapTurn();
+      this.currentPlayer = opponent;
     }
   }
 
@@ -41,23 +36,24 @@ class ConnectFourServer {
   }
 
   async handlePlayerTurn(player, opponent) {
-    await player.conn.write(new TextEncoder().encode("TURN\n"));
-    await opponent.conn.write(new TextEncoder().encode("WAIT\n"));
+    await player.conn.write(new TextEncoder().encode("TURN"));
+    await opponent.conn.write(new TextEncoder().encode("WAIT"));
 
     const buff = new Uint8Array(1024);
     const byteCount = await player.conn.read(buff);
 
     const input = new TextDecoder().decode(buff.slice(0, byteCount)).trim();
-    console.log(`Input from ${player.name}:`, input);
-
     this.processMove(player, input);
 
-    await player.conn.write(new TextEncoder().encode(input));
     await opponent.conn.write(new TextEncoder().encode(input));
   }
 
   processMove(player, input) {
     console.log(`${player.name} played: ${input}`);
+  }
+
+  writeMsg(conn, msg) {
+    conn.write(new TextEncoder().encode(JSON.stringify(msg)));
   }
 
   swapTurn() {

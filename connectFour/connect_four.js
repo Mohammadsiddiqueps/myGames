@@ -1,6 +1,6 @@
 const BOX_LENGTH = 35;
 const EMPTY = "";
-const BLANK_CELL = "🟡"
+const BLANK_CELL = "🟡";
 const PLAYER1_COLOUR = "🟢";
 const PLAYER2_COLOUR = "🔵";
 
@@ -14,7 +14,7 @@ function getOuterLine(lineType, length) {
   return line;
 }
 
-function getMapStructure() {
+export function getMapStructure() {
   const connectMap = [];
 
   for (let index = 0; index < 42; index++) {
@@ -24,7 +24,7 @@ function getMapStructure() {
   return connectMap;
 }
 
-function getBoard(connectMap) {
+export function getBoard(connectMap) {
   const line = getOuterLine("-", 34);
   let board = "\n";
 
@@ -37,7 +37,7 @@ function getBoard(connectMap) {
   }
 
   board += "|\n|" + line + "|\n";
-  board += "| 1️⃣  | 2️⃣  | 3️⃣  | 4️⃣  | 5️⃣  | 6️⃣  | 7️⃣  |\n"
+  board += "| 1️⃣  | 2️⃣  | 3️⃣  | 4️⃣  | 5️⃣  | 6️⃣  | 7️⃣  |\n";
 
   return board;
 }
@@ -51,14 +51,13 @@ function getBottomIndex(connectMap, index) {
 }
 
 function delay() {
-  for (let i = 0; i < 100000000; i++) {
-  }
+  for (let i = 0; i < 100000000; i++) {}
 }
 
-function animateDrop(dropPosition, connectMap, ballColour, topPosition) {
+export function animateDrop(dropPosition, connectMap, ballColour, topPosition) {
   connectMap[topPosition] = ballColour;
   console.clear();
-  console.log("      CONNECT FOUR 🎮 🎮")
+  console.log("      CONNECT FOUR 🎮 🎮");
   console.log(getBoard(connectMap));
   delay();
 
@@ -71,7 +70,7 @@ function animateDrop(dropPosition, connectMap, ballColour, topPosition) {
   return animateDrop(dropPosition, connectMap, ballColour, topPosition + 7);
 }
 
-function getUserInput(player, connectMap, ballColour) {
+export function getUserInput(player, connectMap, ballColour) {
   const playerInput = prompt(player + " Enter Column No to Drop.. : ");
   const dropPosition = getBottomIndex(connectMap, playerInput - 1);
   const isInRange = playerInput > 0 && playerInput < 8;
@@ -81,12 +80,13 @@ function getUserInput(player, connectMap, ballColour) {
     return getUserInput(player, connectMap, ballColour);
   }
 
-  animateDrop(dropPosition, connectMap, ballColour, playerInput - 1);
+  
+  return { playerInput, dropPosition };
 }
 
 function checkCells(connectMap, index, adder, ballColour) {
   for (let i = 1; i < 4; i++) {
-    if (connectMap[index + (adder * i)] !== ballColour) {
+    if (connectMap[index + adder * i] !== ballColour) {
       return false;
     }
   }
@@ -102,7 +102,12 @@ function isPlayerWin(connectMap, ballColour) {
       const isItWonDiagnalLeft = checkCells(connectMap, index, 6, ballColour);
       const isItWonDiagnalRight = checkCells(connectMap, index, 8, ballColour);
 
-      if (isItWonRow || isItWonColumn || isItWonDiagnalLeft || isItWonDiagnalRight) {
+      if (
+        isItWonRow ||
+        isItWonColumn ||
+        isItWonDiagnalLeft ||
+        isItWonDiagnalRight
+      ) {
         return true;
       }
     }
@@ -111,12 +116,12 @@ function isPlayerWin(connectMap, ballColour) {
   return false;
 }
 
-function playConnect() {
-  const connectMap = getMapStructure();
-  console.log("Lets Play connect Four....");
-  console.log(getBoard(connectMap));
-  const player1 = prompt("Enter First player name : ");
-  const player2 = prompt("Enter Second player name : ");
+export function playConnect(player1, player2) {
+  // const connectMap = getMapStructure();
+  // console.log("Lets Play connect Four....");
+  // console.log(getBoard(connectMap));
+  // const player1 = prompt("Enter First player name : ");
+  // const player2 = prompt("Enter Second player name : ");
 
   while (true) {
     getUserInput(player1, connectMap, PLAYER1_COLOUR);
@@ -133,4 +138,4 @@ function playConnect() {
   }
 }
 
-playConnect();
+// playConnect();

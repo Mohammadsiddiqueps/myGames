@@ -1,4 +1,9 @@
-import { animateDrop, getBoard, getMapStructure, getUserInput } from "./connect_four.js";
+import {
+  animateDrop,
+  getBoard,
+  getMapStructure,
+  getUserInput,
+} from "./connect_four.js";
 
 class ConnectFourClient {
   async init(port) {
@@ -20,16 +25,15 @@ class ConnectFourClient {
     this.opponent = matchDetails.opponent;
 
     console.log(
-      `Game Started! You are playing against ${this.opponent}\n Your Color is ${this.color}`
+      `Game Started! You are playing against ${this.opponent}\nYour Color is ${this.color}`
     );
   }
 
   async gameLoop() {
-    while (true) {
-      console.log("Waiting for the server message...");
+    console.log(getBoard(this.connectMap));
 
+    while (true) {
       const serverMessage = await this.readMsg();
-      console.log("Server message:", serverMessage);
 
       if (serverMessage === "WAIT") {
         await this.handleOpponentMove();
@@ -43,38 +47,36 @@ class ConnectFourClient {
   async handleOpponentMove() {
     console.log("Opponent is playing...⏳");
     const opponentMove = JSON.parse(await this.readMsg());
+
     animateDrop(
       opponentMove.dropPosition,
       this.connectMap,
       opponentMove.color,
       opponentMove.playerInput - 1
     );
-
-    console.log("Opponent's move:", opponentMove);
   }
 
   async handleTurn() {
-    console.log(getBoard(this.connectMap));
     const inputInfo = getUserInput(this.name, this.connectMap, this.color);
-    console.log("This is the input of the player:", inputInfo);
+
     await this.connection.write(
       new TextEncoder().encode(
         JSON.stringify({ ...inputInfo, color: this.color })
       )
     );
 
-    const move = await this.readMsg();
     animateDrop(
       inputInfo.dropPosition,
       this.connectMap,
       this.color,
       inputInfo.playerInput - 1
     );
-
-    console.log("My move:", move);
   }
 
-  // asyn writeMsg
+  writeMsg(conn, msg) {
+    conn.write(new TextEncoder().encode(JSON.stringify(msg)));
+  }
+
   async readMsg() {
     const buff = new Uint8Array(1024);
     const byteCount = await this.connection.read(buff);
